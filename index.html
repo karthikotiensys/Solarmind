@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SolarMind — Pilot Signup</title>
+  <meta name="description" content="AI+IoT energy optimization — pilot signup" />
+  <style>
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:#071127;color:#e6eef6}
+    .wrap{max-width:900px;margin:40px auto;padding:20px}
+    .card{background:rgba(255,255,255,0.03);padding:20px;border-radius:12px}
+    header{display:flex;justify-content:space-between;align-items:center}
+    .logo{font-weight:800;color:#06b6d4}
+    h1{margin:18px 0 6px;font-size:24px}
+    p{margin:0 0 16px;color:#9fb0c2}
+    .cols{display:flex;gap:20px}
+    .left{flex:1}
+    .right{width:320px}
+    input,textarea{width:100%;padding:10px;margin:8px 0;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit}
+    .btn{display:inline-block;padding:10px 14px;border-radius:8px;background:#06b6d4;color:#012; font-weight:700;border:none;cursor:pointer}
+    .muted{font-size:13px;color:#93a7b6}
+    @media(max-width:800px){.cols{flex-direction:column}.right{width:100%}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">SolarMind</div>
+      <div class="muted">AI + IoT • Solar-first optimization</div>
+    </header>
+
+    <main style="margin-top:18px">
+      <div class="card cols">
+        <div class="left">
+          <h1>Cut household energy bills — test a free pilot</h1>
+          <p>Plug & play IoT + edge AI that maximizes solar usage and lowers grid draw.</p>
+
+          <div style="margin-top:14px">
+            <div class="muted">How it works — Sense • Predict • Act (30-day pilot)</div>
+            <ul class="muted" style="margin:8px 0 0 18px">
+              <li>Fast install (hours)</li>
+              <li>Live savings report</li>
+              <li>Pilot support from our team</li>
+            </ul>
+          </div>
+
+          <div style="margin-top:18px" class="muted">Cost to start: <strong>₹0 — deploy pilot</strong>. Domain + hosting later (~₹3k/yr).</div>
+        </div>
+
+        <aside class="right">
+          <div class="card">
+            <div style="font-weight:800;margin-bottom:6px">Request pilot</div>
+            <!-- Replace YOUR_FORMSPREE_ID with your Formspree ID, or leave as-is to use localStorage fallback -->
+            <form id="pilotForm" action="https://formspree.io/f/YOUR_FORMSPREE_ID" method="POST" onsubmit="handleSubmit(event)">
+              <input name="name" id="name" placeholder="Name" required />
+              <input name="email" id="email" type="email" placeholder="Email" required />
+              <input name="phone" id="phone" placeholder="Phone (optional)" />
+              <textarea name="note" id="note" rows="3" placeholder="City / short note"></textarea>
+              <button class="btn" type="submit">Request Pilot</button>
+              <div id="msg" class="muted" style="margin-top:10px"></div>
+            </form>
+          </div>
+        </aside>
+      </div>
+    </main>
+
+    <footer style="margin-top:16px" class="muted">© <span id="yr"></span> SolarMind — Built by your team</footer>
+  </div>
+
+<script>
+  document.getElementById('yr').textContent = new Date().getFullYear();
+
+  function handleSubmit(e){
+    e.preventDefault();
+    const name = document.getElementById('name').value.trim();
+    const email= document.getElementById('email').value.trim();
+    const phone= document.getElementById('phone').value.trim();
+    const note = document.getElementById('note').value.trim();
+    const msg = document.getElementById('msg');
+
+    // Save locally (fallback) so leads aren't lost:
+    const leads = JSON.parse(localStorage.getItem('sm_leads')||'[]');
+    leads.push({name,email,phone,note,ts:new Date().toISOString()});
+    localStorage.setItem('sm_leads', JSON.stringify(leads));
+
+    // Try to send to Formspree if configured:
+    const formAction = document.getElementById('pilotForm').action;
+    if(formAction.includes('YOUR_FORMSPREE_ID')){
+      msg.textContent = 'Saved locally. To collect leads via email, replace FORMSPREE ID in the form action.';
+    } else {
+      // Post to Formspree
+      fetch(formAction, {method:'POST', body:new FormData(document.getElementById('pilotForm'))})
+        .then(r => { msg.textContent = 'Request sent — we will contact you.'; document.getElementById('pilotForm').reset(); })
+        .catch(err => { msg.textContent = 'Saved locally (network error).'; });
+    }
+  }
+</script>
+</body>
+</html>
